@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'PlanningPage.dart';
 import 'Notifications.dart';
 import 'ProfilePage.dart';
-import 'RegistrationPage1.dart';
-import 'RegistrationPage2.dart';
-import 'PinCodeScreen.dart';
+
 
 
 void main() {
@@ -22,10 +20,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Color(0xFFF2F2F2),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      // home: HomePage(),
-      home: RegistrationPage1(),
-      // home: RegistrationPage2(),
-      // home: PinCodeScreen(),
+      home: HomePage(),
     );
   }
 }
