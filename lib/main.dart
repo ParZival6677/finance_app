@@ -3,8 +3,13 @@ import 'package:flutter/material.dart';
 import 'PlanningPage.dart';
 import 'Notifications.dart';
 import 'ProfilePage.dart';
-
-
+import 'SavingsPage.dart';
+import 'LoansPage.dart';
+import 'database.dart';
+import 'CategoryDetailPage.dart';
+import 'RegistrationPage1.dart';
+import 'RegistrationPage2.dart';
+import 'PinCodeScreen.dart';
 
 void main() {
   runApp(MyApp());
@@ -21,6 +26,9 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: HomePage(),
+      // home: RegistrationPage1(),
+      // home: RegistrationPage2(),
+      // home: PinCodeScreen(),
     );
   }
 }
@@ -36,278 +44,412 @@ class _HomePageState extends State<HomePage> {
   bool _isLoansExpanded = false;
   bool _isBalanceVisible = true;
 
-  int _totalBalance = 0;
+  num _totalBalance = 0;
+
+  List<Map<String, dynamic>> _savingsList = [];
+  late Map<String, String> _categoryIconMap = {};
+  Map<String, num> _categorySumMap = {};
+
+
+  @override
+  void initState() {
+    super.initState();
+    _updateSavingsList();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateSavingsList();
+  }
+
+  void _updateSavingsList() async {
+    List<Map<String, dynamic>> savings = await DatabaseHelper().getSavings();
+
+    Map<String, num> categorySumMap = {};
+    num total = 0;
+
+    for (var saving in savings) {
+      String category = saving['category'];
+      num amount = saving['amount'];
+      String iconPath = saving['iconPath'];
+      categorySumMap[category] = (categorySumMap[category] ?? 0) + amount;
+      total += saving['amount'];
+      _categoryIconMap[category] = iconPath;
+    }
+
+
+    setState(() {
+      _totalBalance = total;
+      _savingsList = savings;
+      _categorySumMap = categorySumMap;
+      _categoryIconMap = {};
+    });
+  }
+  Future<Map<String, dynamic>> _getCategoryData(String category) async {
+    try {
+      String iconPath = await DatabaseHelper().getCategoryIcons(category);
+      return {'iconPath': iconPath};
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xFFF2F2F2),
-        elevation: 0,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(70.0),
+        child: AppBar(
+          backgroundColor: Color(0xFFF2F2F2),
+          elevation: 0,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      SizedBox(height: 10,),
+                      Text(
+                        _isBalanceVisible ? '${_totalBalance.toString()} \u20B8' : '*******', // Show *** if balance is hidden
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 30.0,
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _isBalanceVisible = !_isBalanceVisible;
+                          });
+                        },
+                        icon: Image.asset(
+                          _isBalanceVisible ? 'assets/icons/eye.png' : 'assets/icons/eye-off.png',
+                          width: 32.0,
+                          height: 32.0,
+                          scale: 0.9,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    'Общий баланс',
+                    style: TextStyle(
+                      color: Color(0xFF7F7F7F),
+                      fontSize: 18.0,
+                    ),
+                  ),
+                  SizedBox( height: 5),
+                ],
+              ),
+              IconButton( // IconButton для уведомлений
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => NotificationsPage()),
+                  );
+                },
+                icon: Container(
+                  margin: EdgeInsets.only(bottom: 25),
+                  child: Image.asset(
+                    'assets/icons/notifications.png',
+                    width: 32.0,
+                    height: 32.0,
+                    scale: 0.9,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          automaticallyImplyLeading: false,
+        ),
+      ),
+
+      body: ListView(
+        children: [
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+            padding: EdgeInsets.all(20.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            child: Column(
               children: [
                 Row(
                   children: [
-                    Text(
-                      _isBalanceVisible ? '${_totalBalance.toString()} \u20B8' : '*******', // Show *** if balance is hidden
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 30.0,
-                      ),
-                    ),
-                    SizedBox(width: 5),
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _isBalanceVisible = !_isBalanceVisible;
-                        });
-                      },
-                      icon: Image.asset(
-                        _isBalanceVisible ? 'assets/icons/eye.png' : 'assets/icons/eye-off.png',
-                        width: 32.0,
-                        height: 32.0,
-                        scale: 0.9,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                'Мои счета',
+                                style: TextStyle(
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Spacer(),
+                              TextButton(
+                                onPressed: () {},
+                                child: Text(
+                                  'Посмотреть все',
+                                  style: TextStyle(
+                                    color: Color(0xFF10B981),
+                                    fontSize: 17,
+                                  ),
+                                ),
+                                style: ButtonStyle(
+                                  minimumSize: MaterialStateProperty.all(Size(109, 20)),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 20.0),
+                          Container(
+                            width: double.infinity,
+                            height: 2.0,
+                            color: Color(0xFFF2F2F2),
+                          ),
+                          Row(
+                            children: [
+                              Image.asset('assets/icons/Thumbnail.png', width: 60.0, height: 60.0),
+                              SizedBox(width: 10.0),
+                              Text(
+                                'Наличные',
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                Text(
-                  'Общий баланс',
-                  style: TextStyle(
-                    color: Color(0xFF7F7F7F),
-                    fontSize: 18.0,
-                  ),
-                ),
-                SizedBox( height: 10),
               ],
             ),
-            IconButton( // IconButton для уведомлений
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => NotificationsPage()),
-                );
-              },
-              icon: Container(
-                margin: EdgeInsets.only(bottom: 25),
-                child: Image.asset(
-                  'assets/icons/notifications.png',
-                  width: 32.0,
-                  height: 32.0,
-                  scale: 0.9,
+          ),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+            padding: EdgeInsets.all(20.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                'Аналитика',
+                                style: TextStyle(
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Spacer(),
+                              TextButton(
+                                onPressed: () {},
+                                child: Text(
+                                  'Подробнее',
+                                  style: TextStyle(
+                                    color: Color(0xFF10B981),
+                                    fontSize: 17,
+                                  ),
+                                ),
+                                style: ButtonStyle(
+                                  minimumSize: MaterialStateProperty.all(Size(109, 20)),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 20.0),
+                          Container(
+                            width: double.infinity,
+                            height: 2.0,
+                            color: Color(0xFFF2F2F2),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-        automaticallyImplyLeading: false,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
-              padding: EdgeInsets.all(20.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  'Мои счета',
-                                  style: TextStyle(
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.bold,
+          ),
+          _buildExpandableContainer(
+            title: 'Накопления',
+            iconPath: '',
+            isExpanded: _isSavingsExpanded,
+            onPressed: () {
+              setState(() {
+                _isSavingsExpanded = !_isSavingsExpanded;
+              });
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 10.0),
+                for (var category in _categorySumMap.keys)
+                  FutureBuilder(
+                    future: _getCategoryData(category),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        String iconPath = snapshot.data?['iconPath'] ?? 'assets/icons/Thumbnail.png';
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 15.0),
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => CategoryDetailPage(categoryName: category)),
+                              );
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 36.0, // Adjust this width as needed
+                                        child: Image.asset(
+                                          iconPath,
+                                          width: 40.0,
+                                          height: 40.0,
+                                          scale: 0.7,
+                                        ),
+                                      ),
+                                      SizedBox(width: 10.0),
+                                      Text(
+                                        '${category}',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                Spacer(),
-                                TextButton(
-                                  onPressed: () {},
-                                  child: Text(
-                                    'Посмотреть все',
+                                  Text(
+                                    _categorySumMap[category] != null && _categorySumMap[category]! > 0
+                                        ? '+${_categorySumMap[category]} \u20B8'
+                                        : '${_categorySumMap[category] ?? 0} \u20B8',
                                     style: TextStyle(
-                                      color: Color(0xFF10B981),
-                                      fontSize: 17,
+                                      color: _categorySumMap[category] != null && _categorySumMap[category]! > 0
+                                          ? Color(0xFF10B981)
+                                          : Colors.black,
+                                      fontSize: 18,
                                     ),
                                   ),
-                                  style: ButtonStyle(
-                                    minimumSize: MaterialStateProperty.all(Size(109, 20)),
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                            SizedBox(height: 20.0),
-                            Container(
-                              width: double.infinity,
-                              height: 2.0,
-                              color: Color(0xFFF2F2F2),
-                            ),
-                            Row(
-                              children: [
-                                Image.asset('assets/icons/Thumbnail.png', width: 60.0, height: 60.0),
-                                SizedBox(width: 10.0),
-                                Text(
-                                  'Наличные',
-                                  style: TextStyle(
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                          ),
+                        );
+                      }
+                    },
                   ),
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-              padding: EdgeInsets.all(20.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  'Аналитика',
-                                  style: TextStyle(
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Spacer(),
-                                TextButton(
-                                  onPressed: () {},
-                                  child: Text(
-                                    'Подробнее',
-                                    style: TextStyle(
-                                      color: Color(0xFF10B981),
-                                      fontSize: 17,
-                                    ),
-                                  ),
-                                  style: ButtonStyle(
-                                    minimumSize: MaterialStateProperty.all(Size(109, 20)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 20.0),
-                            Container(
-                              width: double.infinity,
-                              height: 2.0,
-                              color: Color(0xFFF2F2F2),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            _buildExpandableContainer(
-              title: 'Накопления',
-              iconPath: 'assets/icons/fin-pod.png',
-              isExpanded: _isSavingsExpanded,
-              onPressed: () {
-                setState(() {
-                  _isSavingsExpanded = !_isSavingsExpanded;
-                });
-              },
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 10.0),
-                  ElevatedButton(
-                    onPressed: () {},
-                    child: Text(
-                      '+ Добавить накопления',
-                      style: TextStyle(
-                        color: Color(0xFF10B981),
-                        fontSize: 20,
-                      ),
-                    ),
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(Colors.white),
-                      minimumSize: MaterialStateProperty.all(Size(200, 30)),
-                      elevation: MaterialStateProperty.all(0),
-                      shadowColor: MaterialStateProperty.all(Colors.white),
-                      textStyle: MaterialStateProperty.all(TextStyle(
-                        color: Color(0xFF10B981),
-                        fontSize: 18,
-                      )),
+                SizedBox(height: 20.0),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SavingsPage()),
+                    );
+                  },
+                  child: Text(
+                    '+ Добавить накопления',
+                    style: TextStyle(
+                      color: Color(0xFF10B981),
+                      fontSize: 18,
                     ),
                   ),
-                ],
-              ),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.white),
+                    minimumSize: MaterialStateProperty.all(Size(200, 30)),
+                    elevation: MaterialStateProperty.all(0),
+                    shadowColor: MaterialStateProperty.all(Colors.white),
+                    textStyle: MaterialStateProperty.all(TextStyle(
+                      color: Color(0xFF10B981),
+                      fontSize: 18,
+                    )),
+                  ),
+                ),
+              ],
             ),
-            _buildExpandableContainer(
-              title: 'Кредиты',
-              iconPath: '',
-              isExpanded: _isLoansExpanded,
-              onPressed: () {
-                setState(() {
-                  _isLoansExpanded = !_isLoansExpanded;
-                });
-              },
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 10.0),
-                  ElevatedButton(
-                    onPressed: () {},
-                    child: Text(
-                      '+ Добавить кредиты',
-                      style: TextStyle(
-                        color: Color(0xFF10B981),
-                        fontSize: 20,
-                      ),
-                    ),
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(Colors.white),
-                      minimumSize: MaterialStateProperty.all(Size(200, 30)),
-                      elevation: MaterialStateProperty.all(0),
-                      shadowColor: MaterialStateProperty.all(Colors.white),
-                      textStyle: MaterialStateProperty.all(TextStyle(
-                        color: Color(0xFF10B981),
-                        fontSize: 18,
-                      )),
+          ),
+
+
+          _buildExpandableContainer(
+            title: 'Кредиты',
+            iconPath: '',
+            isExpanded: _isLoansExpanded,
+            onPressed: () {
+              setState(() {
+                _isLoansExpanded = !_isLoansExpanded;
+              });
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 10.0),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => LoansPage()),
+                    );
+                  },
+                  child: Text(
+                    '+ Добавить кредиты',
+                    style: TextStyle(
+                      color: Color(0xFF10B981),
+                      fontSize: 18,
                     ),
                   ),
-                ],
-              ),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.white),
+                    minimumSize: MaterialStateProperty.all(Size(200, 30)),
+                    elevation: MaterialStateProperty.all(0),
+                    shadowColor: MaterialStateProperty.all(Colors.white),
+                    textStyle: MaterialStateProperty.all(TextStyle(
+                      color: Color(0xFF10B981),
+                      fontSize: 18,
+                    )),
+                  ),
+                ),
+              ],
             ),
-            Expanded(
-              child: Container(),
-            ),
-          ],
-        ),
+          ),
+          SizedBox(height: 100),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
@@ -390,9 +532,10 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-
     );
   }
+
+
 
   Widget _buildExpandableContainer({
     required String title,
@@ -401,6 +544,7 @@ class _HomePageState extends State<HomePage> {
     required VoidCallback onPressed,
     required Widget child,
   }) {
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       padding: EdgeInsets.all(20.0),
@@ -457,7 +601,4 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
 }
-
-

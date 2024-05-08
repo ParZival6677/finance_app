@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'database.dart';
+import 'RegistrationPage2.dart';
 
 class RegistrationPage1 extends StatefulWidget {
   @override
@@ -10,11 +12,20 @@ class _RegistrationPage1State extends State<RegistrationPage1> {
   final TextEditingController _phoneNumberController = TextEditingController();
   PhoneNumber number = PhoneNumber(isoCode: 'KZ');
   bool isPhoneNumberVisible = false;
+  String? enteredPhoneNumber;
 
   @override
   void dispose() {
     _phoneNumberController.dispose();
     super.dispose();
+  }
+
+  void _savePhoneNumber(String phoneNumber) async {
+    await DatabaseProvider.dbProvider.insertPhoneNumber(phoneNumber);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => RegistrationPage2()),
+    );
   }
 
   @override
@@ -92,7 +103,7 @@ class _RegistrationPage1State extends State<RegistrationPage1> {
                 initialValue: number,
                 onInputChanged: (PhoneNumber value) {
                   print(value.phoneNumber);
-                  // Можно использовать значение value.phoneNumber для вашей логики
+                  enteredPhoneNumber = value.phoneNumber;
                 },
                 inputBorder: InputBorder.none,
                 selectorConfig: SelectorConfig(
@@ -102,10 +113,12 @@ class _RegistrationPage1State extends State<RegistrationPage1> {
                 autoValidateMode: AutovalidateMode.disabled,
                 selectorTextStyle: TextStyle(color: Colors.black),
                 formatInput: false,
-                maxLength: 15, // Максимальная длина номера телефона
+                maxLength: 15,
                 keyboardType: TextInputType.phone,
-                onSaved: (PhoneNumber value) {
-                  print('On Saved: $value');
+                onInputValidated: (bool value) {
+                  if (value) {
+                    _savePhoneNumber(enteredPhoneNumber!);
+                  }
                 },
               ),
             ),
