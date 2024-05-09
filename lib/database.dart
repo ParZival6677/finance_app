@@ -157,7 +157,15 @@ class DatabaseHelper {
     return result.isNotEmpty;
   }
 
-  Future<String> getCategoryIcons(String category) async {
+  Future<bool> checkLoansCategoryExists(String category) async {
+    final db = await database;
+
+    var result = await db.query('savings', where: 'category = ?', whereArgs: [category]);
+
+    return result.isNotEmpty;
+  }
+
+  Future<String> getCategoryIconsSavings(String category) async {
     final db = await database;
     var result = await db.query('savings', where: 'category = ?', whereArgs: [category]);
     if (result.isNotEmpty) {
@@ -187,13 +195,6 @@ class DatabaseHelper {
     }
   }
 
-  Future<bool> checkCategoryExistsLoans(String category) async {
-    final db = await database;
-
-    var result = await db.query('loans', where: 'category = ?', whereArgs: [category]);
-
-    return result.isNotEmpty;
-  }
 
   Future<String> getCategoryIconsLoans(String category) async {
     final db = await database;

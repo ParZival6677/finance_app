@@ -7,9 +7,11 @@ import 'SavingsPage.dart';
 import 'LoansPage.dart';
 import 'database.dart';
 import 'CategoryDetailPage.dart';
+import 'LoansDetailPage.dart';
 import 'RegistrationPage1.dart';
 import 'RegistrationPage2.dart';
 import 'PinCodeScreen.dart';
+
 
 void main() {
   runApp(MyApp());
@@ -47,20 +49,25 @@ class _HomePageState extends State<HomePage> {
   num _totalBalance = 0;
 
   List<Map<String, dynamic>> _savingsList = [];
-  late Map<String, String> _categoryIconMap = {};
-  Map<String, num> _categorySumMap = {};
+  List<Map<String, dynamic>> _loansList = [];
+  late Map<String, String> _savingsCategoryIconMap = {};
+  late Map<String, String> _loansCategoryIconMap = {};
+  Map<String, num> _savingsCategorySumMap = {};
+  Map<String, num> _loansCategorySumMap = {};
 
 
   @override
   void initState() {
     super.initState();
     _updateSavingsList();
+    _updateLoansList();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _updateSavingsList();
+    _updateLoansList();
   }
 
   void _updateSavingsList() async {
@@ -75,20 +82,52 @@ class _HomePageState extends State<HomePage> {
       String iconPath = saving['iconPath'];
       categorySumMap[category] = (categorySumMap[category] ?? 0) + amount;
       total += saving['amount'];
-      _categoryIconMap[category] = iconPath;
+      _savingsCategoryIconMap[category] = iconPath;
     }
 
 
     setState(() {
       _totalBalance = total;
       _savingsList = savings;
-      _categorySumMap = categorySumMap;
-      _categoryIconMap = {};
+      _savingsCategorySumMap = categorySumMap;
+      _savingsCategoryIconMap = {};
     });
   }
-  Future<Map<String, dynamic>> _getCategoryData(String category) async {
+
+  void _updateLoansList() async {
+    List<Map<String, dynamic>> loans = await DatabaseHelper().getLoans();
+
+    Map<String, num> categorySumMap = {};
+
+    for (var loan in loans) {
+      String category = loan['category'];
+      num amount = loan['amount'];
+      String iconPath = loan['iconPath'];
+      categorySumMap[category] = (categorySumMap[category] ?? 0) + amount;
+      _loansCategoryIconMap[category] = iconPath;
+    }
+
+
+    setState(() {
+      _loansList = loans;
+      _loansCategorySumMap = categorySumMap;
+      _loansCategoryIconMap = {};
+    });
+  }
+
+  Future<Map<String, dynamic>> _getCategoryDataSavings(String category) async {
     try {
-      String iconPath = await DatabaseHelper().getCategoryIcons(category);
+      String iconPath = await DatabaseHelper().getCategoryIconsSavings(category);
+      return {'iconPath': iconPath};
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
+  Future<Map<String, dynamic>> _getCategoryDataLoans(String category) async {
+    try {
+      String iconPath = await DatabaseHelper().getCategoryIconsLoans(category);
       return {'iconPath': iconPath};
     } catch (error) {
       throw error;
@@ -147,7 +186,7 @@ class _HomePageState extends State<HomePage> {
                   SizedBox( height: 5),
                 ],
               ),
-              IconButton( // IconButton для уведомлений
+              IconButton(
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -306,9 +345,9 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 10.0),
-                for (var category in _categorySumMap.keys)
+                for (var category in _savingsCategorySumMap.keys)
                   FutureBuilder(
-                    future: _getCategoryData(category),
+                    future: _getCategoryDataSavings(category),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return CircularProgressIndicator();
@@ -338,7 +377,7 @@ class _HomePageState extends State<HomePage> {
                                   Row(
                                     children: [
                                       SizedBox(
-                                        width: 36.0, // Adjust this width as needed
+                                        width: 36.0,
                                         child: Image.asset(
                                           iconPath,
                                           width: 40.0,
@@ -358,11 +397,11 @@ class _HomePageState extends State<HomePage> {
                                     ],
                                   ),
                                   Text(
-                                    _categorySumMap[category] != null && _categorySumMap[category]! > 0
-                                        ? '+${_categorySumMap[category]} \u20B8'
-                                        : '${_categorySumMap[category] ?? 0} \u20B8',
+                                    _savingsCategorySumMap[category] != null && _savingsCategorySumMap[category]! > 0
+                                        ? '+${_savingsCategorySumMap[category]} \u20B8'
+                                        : '${_savingsCategorySumMap[category] ?? 0} \u20B8',
                                     style: TextStyle(
-                                      color: _categorySumMap[category] != null && _categorySumMap[category]! > 0
+                                      color: _savingsCategorySumMap[category] != null && _savingsCategorySumMap[category]! > 0
                                           ? Color(0xFF10B981)
                                           : Colors.black,
                                       fontSize: 18,
@@ -420,6 +459,77 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 10.0),
+                for (var category in _loansCategorySumMap.keys)
+                  FutureBuilder(
+                    future: _getCategoryDataLoans(category),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        String iconPath = snapshot.data?['iconPath'] ?? 'assets/icons/Thumbnail.png';
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 15.0),
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => LoansDetailPage(categoryName: category)),
+                              );
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 36.0,
+                                        child: Image.asset(
+                                          iconPath,
+                                          width: 40.0,
+                                          height: 40.0,
+                                          scale: 0.7,
+                                        ),
+                                      ),
+                                      SizedBox(width: 10.0),
+                                      Text(
+                                        '${category}',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Text(
+                                    _loansCategorySumMap[category] != null && _loansCategorySumMap[category]! > 0
+                                        ? '+${_loansCategorySumMap[category]} \u20B8'
+                                        : '${_loansCategorySumMap[category] ?? 0} \u20B8',
+                                    style: TextStyle(
+                                      color: _loansCategorySumMap[category] != null && _loansCategorySumMap[category]! > 0
+                                          ? Color(0xFF10B981)
+                                          : Colors.black,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                SizedBox(height: 20.0),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(

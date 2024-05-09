@@ -90,6 +90,13 @@ flutter:
     - assets/icons/radio-bottom-active.png
     - assets/icons/cash-outline.png
     - assets/icons/cash.png
+    - assets/icons/arenda.png
+    - assets/icons/education.png
+    - assets/icons/gifts.png
+    - assets/icons/medicine.png
+    - assets/icons/remont.png
+    - assets/icons/strahovka.png
+    - assets/icons/apteka.png
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'database.dart';
-import 'SavingsPage.dart';
+import 'LoansPage.dart';
 
-class CategoryDetailPage extends StatelessWidget {
+class LoansDetailPage extends StatelessWidget {
   final String categoryName;
 
-  CategoryDetailPage({required this.categoryName});
+  LoansDetailPage({required this.categoryName});
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +140,7 @@ class CategoryDetailPage extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => SavingsPage()),
+                  MaterialPageRoute(builder: (context) => LoansPage()),
                 );
               },
               child: Text(
@@ -159,7 +159,7 @@ class CategoryDetailPage extends StatelessWidget {
 
   Future<Map<String, dynamic>> _getCategoryData() async {
     try {
-      String? iconPath = await DatabaseHelper().getCategoryIconsSavings(categoryName);
+      String? iconPath = await DatabaseHelper().getCategoryIconsLoans(categoryName);
       double currentSum = await _getCategorySum();
       return {'iconPath': iconPath, 'currentSum': currentSum};
     } catch (error) {
@@ -169,7 +169,7 @@ class CategoryDetailPage extends StatelessWidget {
 
   Future<double> _getCategorySum() async {
     try {
-      List<Map<String, dynamic>> savings = await DatabaseHelper().getSavings();
+      List<Map<String, dynamic>> savings = await DatabaseHelper().getLoans();
       double sum = 0;
       for (var saving in savings) {
         if (saving['category'] == categoryName) {
@@ -210,10 +210,10 @@ class CategoryDetailPage extends StatelessWidget {
 
   void _deleteCategory(BuildContext context) async {
     try {
-      List<int> categoryIds = await DatabaseHelper().findCategoryIdsByName(categoryName);
+      List<int> categoryIds = await DatabaseHelper().findCategoryIdsByNameLoans(categoryName);
 
       for (int categoryId in categoryIds) {
-        int rowsAffected = await DatabaseHelper().deleteSavings(categoryId);
+        int rowsAffected = await DatabaseHelper().deleteLoans(categoryId);
         if (rowsAffected <= 0) {
           showDialog(
             context: context,

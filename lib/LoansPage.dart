@@ -16,7 +16,12 @@ class _LoansPageState extends State<LoansPage> {
   final List<String> categoryIconPaths = [
     'assets/icons/Thumbnail.png',
     'assets/icons/cash.png',
-    'assets/icons/loan3.png',
+    'assets/icons/arenda.png',
+    'assets/icons/education.png',
+    'assets/icons/gifts.png',
+    'assets/icons/medicine.png',
+    'assets/icons/remont.png',
+    'assets/icons/strahovka.png'
   ];
 
   String _selectedIconPath = 'assets/icons/cash.png';
@@ -195,7 +200,10 @@ class _LoansPageState extends State<LoansPage> {
                     });
                     Navigator.pop(context);
                   },
-                  leading: Image.asset(categoryIconPaths[index]),
+                  leading: Image.asset(
+                    categoryIconPaths[index],
+                    scale: 0.6,
+                  ),
                 );
               },
             ),
@@ -209,9 +217,8 @@ class _LoansPageState extends State<LoansPage> {
     double amount = double.tryParse(_amountController.text) ?? 0.0;
     String category = _categoryController.text.trim();
 
-    // Проверяем вводимые данные на валидность
     if (amount > 0) {
-      bool categoryExists = await _databaseHelper.checkCategoryExists(category);
+      bool categoryExists = await _databaseHelper.checkLoansCategoryExists(category);
 
       if (categoryExists) {
         showDialog(
@@ -266,7 +273,6 @@ class _LoansPageState extends State<LoansPage> {
         },
       );
 
-      // Очищаем поля ввода
       _amountController.clear();
       _categoryController.clear();
     }

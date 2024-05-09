@@ -175,7 +175,6 @@ class _SavingsPageState extends State<SavingsPage> {
     );
   }
 
-  // Метод для выбора иконки из списка
   void _selectIcon() {
     showDialog(
       context: context,
@@ -195,7 +194,10 @@ class _SavingsPageState extends State<SavingsPage> {
                     });
                     Navigator.pop(context);
                   },
-                  leading: Image.asset(categoryIconPaths[index]),
+                  leading: Image.asset(
+                      categoryIconPaths[index],
+                      scale: 0.6,
+                  ),
                 );
               },
             ),
