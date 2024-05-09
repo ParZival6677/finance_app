@@ -211,7 +211,6 @@ class _SavingsPageState extends State<SavingsPage> {
     double amount = double.tryParse(_amountController.text) ?? 0.0;
     String category = _categoryController.text.trim();
 
-    // Проверяем вводимые данные на валидность
     if (amount > 0) {
       bool categoryExists = await _databaseHelper.checkCategoryExists(category);
 
@@ -268,9 +267,10 @@ class _SavingsPageState extends State<SavingsPage> {
         },
       );
 
-      // Очищаем поля ввода
       _amountController.clear();
       _categoryController.clear();
     }
   }
+
+
 }

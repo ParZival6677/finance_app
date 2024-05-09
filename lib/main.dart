@@ -398,7 +398,7 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                   Text(
                                     _savingsCategorySumMap[category] != null && _savingsCategorySumMap[category]! > 0
-                                        ? '+${_savingsCategorySumMap[category]} \u20B8'
+                                        ? '+ ${_savingsCategorySumMap[category]} \u20B8'
                                         : '${_savingsCategorySumMap[category] ?? 0} \u20B8',
                                     style: TextStyle(
                                       color: _savingsCategorySumMap[category] != null && _savingsCategorySumMap[category]! > 0
@@ -415,7 +415,6 @@ class _HomePageState extends State<HomePage> {
                       }
                     },
                   ),
-                SizedBox(height: 20.0),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(
@@ -512,11 +511,11 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                   Text(
                                     _loansCategorySumMap[category] != null && _loansCategorySumMap[category]! > 0
-                                        ? '+${_loansCategorySumMap[category]} \u20B8'
+                                        ? '- ${_loansCategorySumMap[category]} \u20B8'
                                         : '${_loansCategorySumMap[category] ?? 0} \u20B8',
                                     style: TextStyle(
                                       color: _loansCategorySumMap[category] != null && _loansCategorySumMap[category]! > 0
-                                          ? Color(0xFF10B981)
+                                          ? Color(0xFFB3261E)
                                           : Colors.black,
                                       fontSize: 18,
                                     ),
@@ -529,7 +528,6 @@ class _HomePageState extends State<HomePage> {
                       }
                     },
                   ),
-                SizedBox(height: 20.0),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(

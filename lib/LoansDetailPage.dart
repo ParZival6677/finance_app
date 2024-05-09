@@ -38,6 +38,10 @@ class LoansDetailPage extends StatelessWidget {
           SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            child: GestureDetector(
+              onTap: () {
+                _showSumEditDialog(context);
+              },
             child: FutureBuilder(
               future: _getCategoryData(),
               builder: (context, snapshot) {
@@ -83,8 +87,13 @@ class LoansDetailPage extends StatelessWidget {
               },
             ),
           ),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            child: GestureDetector(
+              onTap: () {
+                _showCategoryEditDialog(context);
+              },
             child: FutureBuilder(
               future: _getCategoryData(),
               builder: (context, snapshot) {
@@ -133,6 +142,7 @@ class LoansDetailPage extends StatelessWidget {
                 }
               },
             ),
+          ),
           ),
           SizedBox(height: 20),
           Center(
@@ -240,6 +250,90 @@ class LoansDetailPage extends StatelessWidget {
       Navigator.of(context).pop();
     } catch (error) {
       print("Ошибка при удалении категорий: $error");
+    }
+  }
+  void _showSumEditDialog(BuildContext context) {
+    double newSum = 0.0;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Редактирование"),
+          content: TextField(
+            keyboardType: TextInputType.numberWithOptions(decimal: true),
+            onChanged: (value) {
+              newSum = double.tryParse(value) ?? 0.0;
+            },
+            decoration: InputDecoration(hintText: "Введите сумму"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Отмена"),
+            ),
+            TextButton(
+              onPressed: () {
+                _saveNewSum(newSum);
+                Navigator.of(context).pop();
+              },
+              child: Text("Сохранить"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showCategoryEditDialog(BuildContext context) {
+    String newCategoryName = "";
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Редактирование"),
+          content: TextField(
+            onChanged: (value) {
+              newCategoryName = value;
+            },
+            decoration: InputDecoration(hintText: "Введите категорию"),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Отмена"),
+            ),
+            TextButton(
+              onPressed: () {
+                _saveNewCategoryName(newCategoryName);
+                Navigator.of(context).pop();
+              },
+              child: Text("Сохранить"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _saveNewSum(double newSum) async {
+    try {
+      await DatabaseHelper().updateLoansSum(categoryName, newSum);
+    } catch (error) {
+      print('Ошибка при сохранении новой суммы: $error');
+    }
+  }
+
+
+
+  void _saveNewCategoryName(String newCategoryName) async {
+    try {
+      await DatabaseHelper().updateCategoryNameLoans(categoryName, newCategoryName);
+    } catch (error) {
+      print('Ошибка при сохранении нового имени категории: $error');
     }
   }
 }

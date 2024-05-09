@@ -111,11 +111,27 @@ class DatabaseHelper {
     );
   }
 
+  Future<int> updateSavingsSum(String categoryName, double newAmount) async {
+    Database db = await database;
+    return await db.rawUpdate(
+      'UPDATE savings SET amount = ? WHERE category = ?',
+      [newAmount, categoryName],
+    );
+  }
+
   Future<int> updateLoans(int id, double amount, String iconPath) async {
     Database db = await database;
     return await db.rawUpdate(
       'UPDATE loans SET amount = amount + ? WHERE id = ?',
       [amount, id],
+    );
+  }
+
+  Future<int> updateLoansSum(String categoryName, double newAmount) async {
+    Database db = await database;
+    return await db.rawUpdate(
+      'UPDATE loans SET amount = ? WHERE category = ?',
+      [newAmount, categoryName],
     );
   }
 
@@ -206,6 +222,31 @@ class DatabaseHelper {
     }
   }
 
+  Future<double> getCategorySum(String categoryName) async {
+    try {
+      List<Map<String, dynamic>> savings = await getSavings();
+      double sum = 0;
+      for (var saving in savings) {
+        if (saving['category'] == categoryName) {
+          sum += saving['amount'];
+        }
+      }
+      return sum;
+    } catch (error) {
+      print('Ошибка при получении суммы категории: $error');
+      throw error;
+    }
+  }
+
+  Future<int> updateCategoryNameSavings(String oldCategoryName, String newCategoryName) async {
+    Database db = await database;
+    return await db.update('savings', {'category': newCategoryName}, where: 'category = ?', whereArgs: [oldCategoryName]);
+  }
+
+  Future<int> updateCategoryNameLoans(String oldCategoryName, String newCategoryName) async {
+    Database db = await database;
+    return await db.update('loans', {'category': newCategoryName}, where: 'category = ?', whereArgs: [oldCategoryName]);
+  }
 
 
 }
