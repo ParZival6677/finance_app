@@ -120,9 +120,6 @@ class _HomePageState extends State<HomePage> {
 
   void _updateAccountsList() async {
     List<Map<String, dynamic>> accounts = await DatabaseHelper().getAccounts();
-    if (accounts.length > 3) {
-      accounts = accounts.sublist(0, 3);
-    }
     setState(() {
       _accountsList = accounts;
     });
