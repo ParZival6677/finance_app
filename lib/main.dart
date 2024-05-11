@@ -8,6 +8,7 @@ import 'LoansPage.dart';
 import 'database.dart';
 import 'CategoryDetailPage.dart';
 import 'LoansDetailPage.dart';
+import 'AccountsPage.dart';
 import 'RegistrationPage1.dart';
 import 'RegistrationPage2.dart';
 import 'PinCodeScreen.dart';
@@ -50,6 +51,7 @@ class _HomePageState extends State<HomePage> {
 
   List<Map<String, dynamic>> _savingsList = [];
   List<Map<String, dynamic>> _loansList = [];
+  List<Map<String, dynamic>> _accountsList = [];
   late Map<String, String> _savingsCategoryIconMap = {};
   late Map<String, String> _loansCategoryIconMap = {};
   Map<String, num> _savingsCategorySumMap = {};
@@ -68,6 +70,7 @@ class _HomePageState extends State<HomePage> {
     super.didChangeDependencies();
     _updateSavingsList();
     _updateLoansList();
+    _updateAccountsList();
   }
 
   void _updateSavingsList() async {
@@ -115,6 +118,17 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _updateAccountsList() async {
+    List<Map<String, dynamic>> accounts = await DatabaseHelper().getAccounts();
+    if (accounts.length > 3) {
+      accounts = accounts.sublist(0, 3);
+    }
+    setState(() {
+      _accountsList = accounts;
+    });
+  }
+
+
   Future<Map<String, dynamic>> _getCategoryDataSavings(String category) async {
     try {
       String iconPath = await DatabaseHelper().getCategoryIconsSavings(category);
@@ -134,10 +148,25 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  num _calculateTotalBalance() {
+    num total = 0;
+
+    for (var account in _accountsList) {
+      total += account['amount'];
+    }
+
+    for (var amount in _savingsCategorySumMap.values) {
+      total += amount;
+    }
+
+    return total;
+  }
+
 
 
   @override
   Widget build(BuildContext context) {
+    _totalBalance = _calculateTotalBalance();
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(70.0),
@@ -237,7 +266,12 @@ class _HomePageState extends State<HomePage> {
                               ),
                               Spacer(),
                               TextButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => AccountsPage()),
+                                  );
+                                },
                                 child: Text(
                                   'Посмотреть все',
                                   style: TextStyle(
@@ -257,19 +291,55 @@ class _HomePageState extends State<HomePage> {
                             height: 2.0,
                             color: Color(0xFFF2F2F2),
                           ),
-                          Row(
-                            children: [
-                              Image.asset('assets/icons/Thumbnail.png', width: 60.0, height: 60.0),
-                              SizedBox(width: 10.0),
-                              Text(
-                                'Наличные',
-                                style: TextStyle(
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.bold,
+                          for (var account in _accountsList)
+                            InkWell(
+                              onTap: () {
+                                // Handle account tap
+                              },
+                              child: Container(
+                                width: double.infinity,
+                                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        SizedBox(
+                                          width: 36.0,
+                                          child: Image.asset(
+                                            account['iconPath'] ?? 'assets/icons/Thumbnail.png',
+                                            width: 40.0,
+                                            height: 40.0,
+                                            scale: 0.7,
+                                          ),
+                                        ),
+                                        SizedBox(width: 15.0),
+                                        Text(
+                                          account['category'] ?? '',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Text(
+                                      '${account['amount']} \u20B8',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 18,
+
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
                         ],
                       ),
                     ),
@@ -319,10 +389,26 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                           SizedBox(height: 20.0),
-                          Container(
-                            width: double.infinity,
-                            height: 2.0,
-                            color: Color(0xFFF2F2F2),
+                          Align(
+                            alignment: Alignment.center,
+                            child: Container(
+                              width: 150.0,
+                              height: 150.0,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.grey,
+                              ),
+                              child: Center(
+                                child: Container(
+                                  width: 85.0,
+                                  height: 85.0,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),

@@ -82,25 +82,29 @@ class DatabaseHelper {
         iconPath TEXT
       )
     ''');
+    await db.execute('''
+    CREATE TABLE accounts(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      amount REAL,
+      category TEXT,
+      iconPath TEXT
+    )
+  ''');
   }
+
+
+
+  // ===================Savings====================== //
+
   Future<int> insertSavings(double amount, String category, String iconPath) async {
     Database db = await database;
     return await db.insert('savings', {'amount': amount, 'category': category, 'iconPath': iconPath});
   }
 
-  Future<int> insertLoans(double amount, String category, String iconPath) async {
-    Database db = await database;
-    return await db.insert('loans', {'amount': amount, 'category': category, 'iconPath': iconPath});
-  }
 
   Future<List<Map<String, dynamic>>> getSavings() async {
     Database db = await database;
     return await db.query('savings');
-  }
-
-  Future<List<Map<String, dynamic>>> getLoans() async {
-    Database db = await database;
-    return await db.query('loans');
   }
 
   Future<int> updateSavings(int id, double amount, String iconPath) async {
@@ -119,30 +123,9 @@ class DatabaseHelper {
     );
   }
 
-  Future<int> updateLoans(int id, double amount, String iconPath) async {
-    Database db = await database;
-    return await db.rawUpdate(
-      'UPDATE loans SET amount = amount + ? WHERE id = ?',
-      [amount, id],
-    );
-  }
-
-  Future<int> updateLoansSum(String categoryName, double newAmount) async {
-    Database db = await database;
-    return await db.rawUpdate(
-      'UPDATE loans SET amount = ? WHERE category = ?',
-      [newAmount, categoryName],
-    );
-  }
-
   Future<int> deleteSavings(int id) async {
     Database db = await database;
     return await db.delete('savings', where: 'id = ?', whereArgs: [id]);
-  }
-
-  Future<int> deleteLoans(int id) async {
-    Database db = await database;
-    return await db.delete('loans', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<List<int>> findCategoryIdsByName(String categoryName) async {
@@ -173,14 +156,6 @@ class DatabaseHelper {
     return result.isNotEmpty;
   }
 
-  Future<bool> checkLoansCategoryExists(String category) async {
-    final db = await database;
-
-    var result = await db.query('savings', where: 'category = ?', whereArgs: [category]);
-
-    return result.isNotEmpty;
-  }
-
   Future<String> getCategoryIconsSavings(String category) async {
     final db = await database;
     var result = await db.query('savings', where: 'category = ?', whereArgs: [category]);
@@ -190,6 +165,76 @@ class DatabaseHelper {
       return '';
     }
   }
+
+  Future<double> getCategorySum(String categoryName) async {
+    try {
+      List<Map<String, dynamic>> savings = await getSavings();
+      double sum = 0;
+      for (var saving in savings) {
+        if (saving['category'] == categoryName) {
+          sum += saving['amount'];
+        }
+      }
+      return sum;
+    } catch (error) {
+      print('Ошибка при получении суммы категории: $error');
+      throw error;
+    }
+  }
+
+  Future<int> updateCategoryNameSavings(String oldCategoryName, String newCategoryName) async {
+    Database db = await database;
+    return await db.update('savings', {'category': newCategoryName}, where: 'category = ?', whereArgs: [oldCategoryName]);
+  }
+
+
+
+  // =================Loans=================== //
+
+  Future<int> insertLoans(double amount, String category, String iconPath) async {
+    Database db = await database;
+    return await db.insert('loans', {'amount': amount, 'category': category, 'iconPath': iconPath});
+  }
+
+  Future<List<Map<String, dynamic>>> getLoans() async {
+    Database db = await database;
+    return await db.query('loans');
+  }
+
+
+  Future<int> updateLoans(int id, double amount, String iconPath) async {
+    Database db = await database;
+    return await db.rawUpdate(
+      'UPDATE loans SET amount = amount + ? WHERE id = ?',
+      [amount, id],
+    );
+  }
+
+  Future<int> updateLoansSum(String categoryName, double newAmount) async {
+    Database db = await database;
+    return await db.rawUpdate(
+      'UPDATE loans SET amount = ? WHERE category = ?',
+      [newAmount, categoryName],
+    );
+  }
+
+
+  Future<int> deleteLoans(int id) async {
+    Database db = await database;
+    return await db.delete('loans', where: 'id = ?', whereArgs: [id]);
+  }
+
+
+
+  Future<bool> checkLoansCategoryExists(String category) async {
+    final db = await database;
+
+    var result = await db.query('savings', where: 'category = ?', whereArgs: [category]);
+
+    return result.isNotEmpty;
+  }
+
+
 
   Future<List<int>> findCategoryIdsByNameLoans(String categoryName) async {
     try {
@@ -222,13 +267,108 @@ class DatabaseHelper {
     }
   }
 
-  Future<double> getCategorySum(String categoryName) async {
+
+  Future<int> updateCategoryNameLoans(String oldCategoryName, String newCategoryName) async {
+    Database db = await database;
+    return await db.update('loans', {'category': newCategoryName}, where: 'category = ?', whereArgs: [oldCategoryName]);
+  }
+
+
+  /* ===========================================
+  ===================Accounts===================
+  =============================================*/
+
+
+  Future<int> insertAccounts(double amount, String category, String iconPath) async {
+    Database db = await database;
+    int accountId = await db.insert('accounts', {
+      'amount': amount,
+      'category': category,
+      'iconPath': iconPath,
+    });
+    return accountId;
+  }
+
+
+  Future<List<Map<String, dynamic>>> getAccounts() async {
+    Database db = await database;
+    List<Map<String, dynamic>> accounts = await db.query('accounts');
+    return accounts;
+  }
+
+  Future<List<Map<String, dynamic>>> getAllAccounts() async {
+    Database db = await database;
+    List<Map<String, dynamic>> accounts = await db.query('accounts');
+    return accounts;
+  }
+
+
+  Future<int> updateAccounts(int id, double amount, String iconPath) async {
+    Database db = await database;
+    return await db.rawUpdate(
+      'UPDATE accounts SET amount = amount + ? WHERE id = ?',
+      [amount, id],
+    );
+  }
+
+  Future<int> updateAccountsSum(String categoryName, double newAmount) async {
+    Database db = await database;
+    return await db.rawUpdate(
+      'UPDATE accounts SET amount = ? WHERE category = ?',
+      [newAmount, categoryName],
+    );
+  }
+
+  Future<int> deleteAccounts(int id) async {
+    Database db = await database;
+    return await db.delete('accounts', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<List<int>> findAccountsCategoryIdsByName(String categoryName) async {
     try {
-      List<Map<String, dynamic>> savings = await getSavings();
+      Database db = await database;
+      List<Map<String, dynamic>> result = await db.query(
+        'accounts',
+        columns: ['id'],
+        where: 'category = ?',
+        whereArgs: [categoryName],
+      );
+      List<int> categoryIds = [];
+      for (var row in result) {
+        categoryIds.add(row['id'] as int);
+      }
+      return categoryIds;
+    } catch (error) {
+      print("Ошибка при поиске идентификаторов категории: $error");
+      return [];
+    }
+  }
+
+  Future<bool> checkAccountsCategoryExists(String category) async {
+    final db = await database;
+
+    var result = await db.query('accounts', where: 'category = ?', whereArgs: [category]);
+
+    return result.isNotEmpty;
+  }
+
+  Future<String> getAccountsCategoryIcons(String category) async {
+    final db = await database;
+    var result = await db.query('accounts', where: 'category = ?', whereArgs: [category]);
+    if (result.isNotEmpty) {
+      return result.first['iconPath'] as String;
+    } else {
+      return '';
+    }
+  }
+
+  Future<double> getAccountsCategorySum(String categoryName) async {
+    try {
+      List<Map<String, dynamic>> accounts = await getAccounts();
       double sum = 0;
-      for (var saving in savings) {
-        if (saving['category'] == categoryName) {
-          sum += saving['amount'];
+      for (var account in accounts) {
+        if (account['category'] == categoryName) {
+          sum += account['amount'];
         }
       }
       return sum;
@@ -238,15 +378,15 @@ class DatabaseHelper {
     }
   }
 
-  Future<int> updateCategoryNameSavings(String oldCategoryName, String newCategoryName) async {
+  Future<int> updateAccountsCategoryName(String oldCategoryName, String newCategoryName) async {
     Database db = await database;
-    return await db.update('savings', {'category': newCategoryName}, where: 'category = ?', whereArgs: [oldCategoryName]);
+    return await db.update('accounts', {'category': newCategoryName}, where: 'category = ?', whereArgs: [oldCategoryName]);
   }
 
-  Future<int> updateCategoryNameLoans(String oldCategoryName, String newCategoryName) async {
+  Future<Map<String, dynamic>> getAccountById(int id) async {
     Database db = await database;
-    return await db.update('loans', {'category': newCategoryName}, where: 'category = ?', whereArgs: [oldCategoryName]);
+    List<Map<String, dynamic>> accounts = await db.query('accounts', where: 'id = ?', whereArgs: [id], limit: 1);
+    return accounts.isNotEmpty ? accounts.first : {};
   }
-
 
 }
