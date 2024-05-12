@@ -32,30 +32,45 @@ class _EditAccountPageState extends State<EditAccountPage> {
     super.dispose();
   }
 
+
   Future<void> _saveChanges(BuildContext context) async {
     double amount = double.parse(_amountController.text);
     String category = _categoryController.text;
     String iconPath = _iconPath;
     int id = widget.accountData['id'];
 
-    if (_amountController.text != widget.accountData['amount'].toString()) {
-      int result = await DatabaseHelper().updateAccountsSum(category, amount);
-      final snackBar = SnackBar(
-        content: Text(result > 0 ? 'Сумма счета успешно обновлена' : 'Не удалось обновить сумму счета'),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    if (_amountController.text != widget.accountData['amount'].toString() ||
+        _categoryController.text != widget.accountData['category']) {
+      if (_categoryController.text != widget.accountData['category']) {
+        int updateCategoryResult = await DatabaseHelper()
+            .updateAccountsCategoryName(widget.accountData['category'], _categoryController.text);
+        if (updateCategoryResult > 0) {
+          print('Category name updated successfully');
+        } else {
+          print('Failed to update category name');
+        }
+      }
+
+      int updateAmountResult = await DatabaseHelper().updateAccounts(id, amount, iconPath);
+      if (updateAmountResult > 0) {
+        print('Amount updated successfully');
+
+        final snackBar = SnackBar(
+          content: Text('Changes saved successfully'),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      } else {
+        print('Failed to update amount');
+      }
     } else {
-      int result = await DatabaseHelper().updateAccounts(id, amount, iconPath);
       final snackBar = SnackBar(
-        content: Text(result > 0 ? 'Счет успешно обновлен' : 'Не удалось обновить счет'),
+        content: Text('No changes to save'),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
 
     Navigator.of(context).pop();
   }
-
-
 
 
   Future<void> _deleteAccount(BuildContext context) async {

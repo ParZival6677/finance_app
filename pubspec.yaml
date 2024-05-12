@@ -41,6 +41,10 @@ dependencies:
   libphonenumber: ^2.0.2
   equatable: ^2.0.5
   intl_phone_number_input: ^0.7.4
+  firebase_core: ^2.31.0
+  firebase_auth: ^4.19.5
+  shared_preferences: ^2.2.3
+
 
 dev_dependencies:
   flutter_test:

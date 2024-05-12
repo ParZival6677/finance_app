@@ -45,7 +45,7 @@ class _RegistrationPage1State extends State<RegistrationPage1> {
             child: Text(
               'Введите номер телефона, чтобы войти',
               style: TextStyle(
-                fontSize: 32,
+                fontSize: 28,
               ),
               textAlign: TextAlign.center,
             ),
@@ -80,7 +80,7 @@ class _RegistrationPage1State extends State<RegistrationPage1> {
                       ),
                       bottom: BorderSide(
                         color: Colors.black,
-                        width: 2.0,
+                        width: 2.0, // Толщина черной полоски
                       ),
                     ),
                   ),
@@ -93,33 +93,41 @@ class _RegistrationPage1State extends State<RegistrationPage1> {
             visible: isPhoneNumberVisible,
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 40),
-              child: InternationalPhoneNumberInput(
-                inputDecoration: InputDecoration(
-                  contentPadding: EdgeInsets.only(bottom: 15, left: 0),
-                  border: InputBorder.none,
-                  hintText: 'Phone Number',
-                  hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 16),
-                ),
-                initialValue: number,
-                onInputChanged: (PhoneNumber value) {
-                  print(value.phoneNumber);
-                  enteredPhoneNumber = value.phoneNumber;
-                },
-                inputBorder: InputBorder.none,
-                selectorConfig: SelectorConfig(
-                  selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
-                ),
-                ignoreBlank: false,
-                autoValidateMode: AutovalidateMode.disabled,
-                selectorTextStyle: TextStyle(color: Colors.black),
-                formatInput: false,
-                maxLength: 15,
-                keyboardType: TextInputType.phone,
-                onInputValidated: (bool value) {
-                  if (value) {
-                    _savePhoneNumber(enteredPhoneNumber!);
-                  }
-                },
+              child: Column(
+                children: [
+                  InternationalPhoneNumberInput(
+                    inputDecoration: InputDecoration(
+                      contentPadding: EdgeInsets.only(bottom: 15, left: 0),
+                      border: InputBorder.none,
+                      hintText: 'Номер телефона',
+                      hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 16),
+                    ),
+                    initialValue: number,
+                    onInputChanged: (PhoneNumber value) {
+                      print(value.phoneNumber);
+                      enteredPhoneNumber = value.phoneNumber;
+                    },
+                    inputBorder: InputBorder.none,
+                    selectorConfig: SelectorConfig(
+                      selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+                    ),
+                    ignoreBlank: false,
+                    autoValidateMode: AutovalidateMode.disabled,
+                    selectorTextStyle: TextStyle(color: Colors.black),
+                    formatInput: false,
+                    maxLength: 15,
+                    keyboardType: TextInputType.phone,
+                    onInputValidated: (bool value) {
+                      if (value) {
+                        _savePhoneNumber(enteredPhoneNumber!);
+                      }
+                    },
+                  ),
+                  Divider(
+                    height: 2,
+                    color: Colors.black,
+                  ),
+                ],
               ),
             ),
           ),

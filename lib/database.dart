@@ -93,7 +93,6 @@ class DatabaseHelper {
   }
 
 
-
   // ===================Savings====================== //
 
   Future<int> insertSavings(double amount, String category, String iconPath) async {
@@ -306,7 +305,7 @@ class DatabaseHelper {
   Future<int> updateAccounts(int id, double amount, String iconPath) async {
     Database db = await database;
     return await db.rawUpdate(
-      'UPDATE accounts SET amount = amount + ? WHERE id = ?',
+      'UPDATE accounts SET amount = ? WHERE id = ?',
       [amount, id],
     );
   }
