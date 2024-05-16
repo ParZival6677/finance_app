@@ -92,7 +92,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
                     InkWell(
                       onTap: _showIconSelectionDialog,
                       child: Image.asset(
-                        _selectedIconPath.isEmpty ? 'assets/icons/Thumbnail.png' : _selectedIconPath,
+                        _selectedIconPath.isEmpty ? 'assets/icons/nalichka.png' : _selectedIconPath,
                         width: 32.0,
                         height: 32.0,
                         scale: 0.8,
@@ -242,7 +242,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
                 ),
               ],
             ),
-            SizedBox(height: 210),
+            SizedBox(height: 320.0),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15.0),
               child: Align(
@@ -290,9 +290,10 @@ class _AddAccountPageState extends State<AddAccountPage> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildIconSelectionItem('assets/icons/Thumbnail.png'),
+              _buildIconSelectionItem('assets/icons/nalichka.png'),
               _buildIconSelectionItem('assets/icons/kaspi-logo.png'),
-              _buildIconSelectionItem('assets/icons/halyk_logo.png'),
+              _buildIconSelectionItem('assets/icons/halyk-logo.png'),
+              _buildIconSelectionItem('assets/icons/forte-logo.png'),
             ],
           ),
         );

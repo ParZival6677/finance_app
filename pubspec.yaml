@@ -38,7 +38,6 @@ dependencies:
   sqflite: ^2.3.3+1
   path: ^1.9.0
   intl: ^0.19.0
-  libphonenumber: ^2.0.2
   equatable: ^2.0.5
   intl_phone_number_input: ^0.7.4
 
@@ -68,7 +67,6 @@ flutter:
     - assets/icons/home.png
     - assets/icons/person.png
     - assets/icons/wallet.png
-    - assets/icons/Thumbnail.png
     - assets/icons/caret-down.png
     - assets/icons/caret-up-outline.png
     - assets/icons/fin-pod.png
@@ -90,6 +88,7 @@ flutter:
     - assets/icons/radio-bottom-active.png
     - assets/icons/cash-outline.png
     - assets/icons/cash.png
+    - assets/icons/nalichka.png
     - assets/icons/arenda.png
     - assets/icons/education.png
     - assets/icons/gifts.png
@@ -102,9 +101,10 @@ flutter:
     - assets/icons/save-button.png
     - assets/icons/trash-red-outline.png
     - assets/icons/kaspi-logo.png
-    - assets/icons/halyk_logo.png
+    - assets/icons/halyk-logo.png
     - assets/icons/switch-enabled.png
     - assets/icons/switch-disabled.png
+    - assets/icons/forte-logo.png
 
 
 

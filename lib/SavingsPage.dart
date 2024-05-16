@@ -15,7 +15,7 @@ class _SavingsPageState extends State<SavingsPage> {
 
   final List<String> categoryIconPaths = [
     'assets/icons/fin-pod.png',
-    'assets/icons/Thumbnail.png',
+    'assets/icons/nalichka.png',
     'assets/icons/cash.png',
   ];
 

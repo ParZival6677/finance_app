@@ -9,6 +9,7 @@ import 'database.dart';
 import 'CategoryDetailPage.dart';
 import 'LoansDetailPage.dart';
 import 'AccountsPage.dart';
+import 'EditAccountPage.dart';
 import 'RegistrationPage1.dart';
 import 'RegistrationPage2.dart';
 import 'PinCodeScreen.dart';
@@ -292,7 +293,10 @@ class _HomePageState extends State<HomePage> {
                           for (var account in _accountsList)
                             InkWell(
                               onTap: () {
-                                // Handle account tap
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => EditAccountPage(accountData: account ,)),
+                                );
                               },
                               child: Container(
                                 width: double.infinity,
