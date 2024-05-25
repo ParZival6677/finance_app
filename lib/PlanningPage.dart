@@ -121,7 +121,9 @@ class _PlanningPageState extends State<PlanningPage> {
                                 Text(
                                   '${plan['plannedAmount']} \u20B8',
                                   style: TextStyle(
-                                    color: Color(0xFF10B981),
+                                    color: (plan['plannedAmount'] < 0)
+                                        ? Color(0xFFB3261E)
+                                        : Color(0xFF10B981),
                                     fontSize: 18,
                                   ),
                                 ),

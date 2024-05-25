@@ -1,13 +1,6 @@
 import 'package:flutter/material.dart';
 import 'database.dart';
 
-// сохранить plannedAmount из ввода пользователя, и использовать amount из выбранной
-// категории, нужно изменить немного логику сохранения планов.
-// нужно чтобы:
-// 1) plannedAmount вводился пользователем.
-// 2) amount брался из выбранной категории.
-// 3) Изменить метод _savePlans для получения и сохранения этих значений соответственно
-
 class AddPlansPage extends StatefulWidget {
   @override
   _AddPlansPageState createState() => _AddPlansPageState();
@@ -264,34 +257,35 @@ class _AddPlansPageState extends State<AddPlansPage> {
     return iconPath;
   }
 
-  void _savePlans(BuildContext context) {
-    double amount = double.tryParse(_amountController.text) ?? 0.0;
+  void _savePlans(BuildContext context) async {
+    double plannedAmount = double.tryParse(_amountController.text) ?? 0.0;
 
-    if (amount <= 0) {
+    if (plannedAmount == 0 || _selectedCategory.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Введите корректную сумму'),
+          content: Text('Введите корректную сумму и выберите категорию'),
         ),
       );
       return;
     }
 
-    // Insert plan data into the database
-    DatabaseHelper().insertPlans(amount, _selectedCategory, _selectedIconPath, amount).then((planId) {
-      if (planId != -1) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Сумма успешно добавлена в базу данных'),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Ошибка при добавлении суммы в базу данных'),
-          ),
-        );
-      }
-    });
+    int planId = await DatabaseHelper().insertPlans(plannedAmount, _selectedCategory);
+    if (planId != -1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('План успешно добавлен в базу данных'),
+        ),
+      );
+      Navigator.of(context).pop();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ошибка при добавлении плана в базу данных'),
+        ),
+      );
+    }
   }
+
+
 }
 
