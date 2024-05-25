@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'database.dart';
 import 'main.dart';
 import 'ProfilePage.dart';
+import 'AddPlansPage.dart';
 
 class PlanningPage extends StatefulWidget {
   @override
@@ -9,6 +11,20 @@ class PlanningPage extends StatefulWidget {
 
 class _PlanningPageState extends State<PlanningPage> {
   int _selectedIndex = 3;
+  List<Map<String, dynamic>> _plans = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPlans();
+  }
+
+  Future<void> _loadPlans() async {
+    List<Map<String, dynamic>> plans = await DatabaseHelper().getPlans();
+    setState(() {
+      _plans = plans;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,29 +32,24 @@ class _PlanningPageState extends State<PlanningPage> {
       appBar: AppBar(
         backgroundColor: Color(0xFFF2F2F2),
         elevation: 0,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Планирование бюджета на месяц', // Заголовок страницы
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  'Добавьте категорию для отслеживания', // Заголовок страницы
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 17.0,
-                  ),
-                ),
-              ],
+            Text(
+              'Планирование бюджета на месяц',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Добавьте категорию для отслеживания',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 17.0,
+              ),
             ),
           ],
         ),
@@ -54,68 +65,104 @@ class _PlanningPageState extends State<PlanningPage> {
             borderRadius: BorderRadius.circular(10.0),
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  SizedBox(height: 20.0),
-                  Expanded(
+              for (var plan in _plans)
+                InkWell(
+                  onTap: () {
+                    // Implement navigation to edit plan page
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-
-                          ],
-                        ),
-                        SizedBox(height: 20.0),
-                        Container(
-                          width: double.infinity,
-                          height: 2.0,
-                          color: Color(0xFFF2F2F2),
-                        ),
-                        Row(
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {},
-                              child: Text(
-                                '+ Добавить категорию',
-                                style: TextStyle(
-                                  color: Color(0xFF10B981),
-                                  fontSize: 20,
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 36.0,
+                                  child: Image.asset(
+                                    plan['iconPath'] ?? 'assets/icons/default-icon.png',
+                                    width: 40.0,
+                                    height: 40.0,
+                                    scale: 0.7,
+                                  ),
                                 ),
-                              ),
-                              style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(Colors.white),
-                                minimumSize: MaterialStateProperty.all(Size(200, 30)),
-                                elevation: MaterialStateProperty.all(0),
-                                shadowColor: MaterialStateProperty.all(Colors.white),
-                                textStyle: MaterialStateProperty.all(TextStyle(
-                                  color: Color(0xFF10B981),
-                                  fontSize: 18,
-                                )),
-                              ),
+                                SizedBox(width: 15.0),
+                                Text(
+                                  plan['category'] ?? '',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  '${plan['amount']} \u20B8',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                                SizedBox(height: 5),
+                                Text(
+                                  '${plan['plannedAmount']} \u20B8',
+                                  style: TextStyle(
+                                    color: Color(0xFF10B981),
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       ],
                     ),
                   ),
-                ],
-              ),
-              SizedBox(height: 20.0), // Пространство между контейнерами
+                ),
               Container(
-                height: 2.0, // Горизонтальная полоса деления
-                color: Colors.grey[300],
+                width: double.infinity,
+                height: 2.0,
+                color: Color(0xFFF2F2F2),
               ),
-              SizedBox(height: 20.0), // Пространство между контейнерами
               Row(
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Здесь добавьте ваш второй контейнер и его содержимое
-                      ],
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => AddPlansPage()),
+                      );
+                    },
+                    child: Text(
+                      '+ Добавить категорию',
+                      style: TextStyle(
+                        color: Color(0xFF10B981),
+                        fontSize: 20,
+                      ),
+                    ),
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.white),
+                      minimumSize: MaterialStateProperty.all(Size(200, 30)),
+                      elevation: MaterialStateProperty.all(0),
+                      shadowColor: MaterialStateProperty.all(Colors.white),
+                      textStyle: MaterialStateProperty.all(TextStyle(
+                        color: Color(0xFF10B981),
+                        fontSize: 18,
+                      )),
                     ),
                   ),
                 ],
@@ -133,7 +180,6 @@ class _PlanningPageState extends State<PlanningPage> {
             _selectedIndex = index;
             switch (index) {
               case 0:
-                // Navigate to the HomePage
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => HomePage()),
@@ -141,24 +187,17 @@ class _PlanningPageState extends State<PlanningPage> {
                 break;
               case 1:
               // Navigate to the OperationPage
-              //   Navigator.push(
-              //     context,
-              //     MaterialPageRoute(builder: (context) => OperationsPage()),
-              //   );
                 break;
               case 2:
               // Navigate to the Adding Page
-
                 break;
               case 3:
-                // Navigate to the PlanningPage
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => PlanningPage()),
                 );
                 break;
               case 4:
-              // Navigate to the ProfilePage
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ProfilePage()),

@@ -90,7 +90,17 @@ class DatabaseHelper {
       iconPath TEXT
     )
   ''');
+    await db.execute('''
+    CREATE TABLE plans(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      amount REAL,
+      category TEXT,
+      iconPath TEXT,
+      plannedAmount REAL
+    )
+  ''');
   }
+
 
 
   // ===================Savings====================== //
@@ -387,5 +397,116 @@ class DatabaseHelper {
     List<Map<String, dynamic>> accounts = await db.query('accounts', where: 'id = ?', whereArgs: [id], limit: 1);
     return accounts.isNotEmpty ? accounts.first : {};
   }
+
+  // ======================Plans==================== //
+
+  Future<int> insertPlans(double amount, String category, String iconPath, double plannedAmount) async {
+    Database db = await database;
+    int planId = await db.insert('plans', {
+      'amount': amount,
+      'category': category,
+      'iconPath': iconPath,
+      'plannedAmount': plannedAmount,
+    });
+    return planId;
+  }
+
+  Future<List<Map<String, dynamic>>> getPlans() async {
+    Database db = await database;
+    List<Map<String, dynamic>> plans = await db.query('plans');
+    return plans;
+  }
+
+  Future<List<Map<String, dynamic>>> getAllPlansWithInfo() async {
+    Database db = await database;
+    List<Map<String, dynamic>> plans = await db.rawQuery('''
+      SELECT p.id, p.amount, p.category, p.iconPath, p.plannedAmount, s.amount AS savingAmount, a.amount AS accountAmount
+      FROM plans p
+      LEFT JOIN savings s ON p.category = s.category
+      LEFT JOIN accounts a ON p.category = a.category
+    ''');
+    return plans;
+  }
+
+  Future<int> updatePlans(int id, double amount, String iconPath, double plannedAmount) async {
+    Database db = await database;
+    return await db.rawUpdate(
+      'UPDATE plans SET amount = ?, iconPath = ?, plannedAmount = ? WHERE id = ?',
+      [amount, iconPath, plannedAmount, id],
+    );
+  }
+
+  Future<int> deletePlans(int id) async {
+    Database db = await database;
+    return await db.delete('plans', where: 'id = ?', whereArgs: [id]);
+  }
+
+
+  Future<List<int>> findPlansCategoryIdsByName(String categoryName) async {
+    try {
+      Database db = await database;
+      List<Map<String, dynamic>> result = await db.query(
+        'plans',
+        columns: ['id'],
+        where: 'category = ?',
+        whereArgs: [categoryName],
+      );
+      List<int> categoryIds = [];
+      for (var row in result) {
+        categoryIds.add(row['id'] as int);
+      }
+      return categoryIds;
+    } catch (error) {
+      print("Ошибка при поиске идентификаторов категории: $error");
+      return [];
+    }
+  }
+
+  Future<bool> checkPlansCategoryExists(String category) async {
+    final db = await database;
+
+    var result = await db.query('plans', where: 'category = ?', whereArgs: [category]);
+
+    return result.isNotEmpty;
+  }
+
+  Future<String> getPlansCategoryIcons(String category) async {
+    final db = await database;
+    var result = await db.query('plans', where: 'category = ?', whereArgs: [category]);
+    if (result.isNotEmpty) {
+      return result.first['iconPath'] as String;
+    } else {
+      return '';
+    }
+  }
+
+  Future<double> getPlansCategorySum(String categoryName) async {
+    try {
+      List<Map<String, dynamic>> plans = await getPlans();
+      double sum = 0;
+      for (var plan in plans) {
+        if (plan['category'] == categoryName) {
+          sum += plan['amount'];
+        }
+      }
+      return sum;
+    } catch (error) {
+      print('Ошибка при получении суммы категории: $error');
+      throw error;
+    }
+  }
+
+  Future<int> updatePlansCategoryName(String oldCategoryName, String newCategoryName) async {
+    Database db = await database;
+    return await db.update('plans', {'category': newCategoryName}, where: 'category = ?', whereArgs: [oldCategoryName]);
+  }
+
+  Future<Map<String, dynamic>> getPlanById(int id) async {
+    Database db = await database;
+    List<Map<String, dynamic>> plans = await db.query('plans', where: 'id = ?', whereArgs: [id], limit: 1);
+    return plans.isNotEmpty ? plans.first : {};
+  }
+
+
 
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
 import 'PlanningPage.dart';
 import 'Notifications.dart';
 import 'ProfilePage.dart';

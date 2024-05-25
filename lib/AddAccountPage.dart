@@ -185,7 +185,7 @@ class _AddAccountPageState extends State<AddAccountPage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15.0),
                   child: Container(
-                    padding: EdgeInsets.fromLTRB(20, 20, 130, 20),
+                    padding: EdgeInsets.fromLTRB(20, 20, 165, 20),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(10.0),

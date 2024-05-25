@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'PlanningPage.dart';
 import 'main.dart';
+import 'MapsPage.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -17,20 +18,17 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: Color(0xFFF2F2F2),
         elevation: 0,
         title: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      'Вы вошли через номер телефона',
-                      style: TextStyle(
-                        fontSize: 20.0,
-                      ),
-                    ),
-                  ],
+                Text(
+                  'Вы вошли через номер телефона',
+                  style: TextStyle(
+                    fontSize: 20.0,
+                  ),
                 ),
                 Text(
                   '+7 (777) 777-77-77',
@@ -39,13 +37,26 @@ class _ProfilePageState extends State<ProfilePage> {
                     fontSize: 18.0,
                   ),
                 ),
-                SizedBox(height: 10),
+              ],
+            ),
+            Row(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.location_on, size: 32),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MapScreen()),
+                    );
+                  },
+                ),
               ],
             ),
           ],
         ),
         automaticallyImplyLeading: false,
       ),
+
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.0),
